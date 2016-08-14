@@ -31,7 +31,7 @@ int32_t main(int argc, int **argv) {
 	}
 
 	vcg = initContainer(1920, 1080, VCG_CONTAINER_MPEGTS, VCG_CODEC_ID_NONE,
-			VCG_CODEC_ID_H264, 60, &saveClip);
+			VCG_CODEC_ID_H264, 1000, &saveClip);
 	if (vcg == NULL) {
 		printf("initContainer failed \n");
 		return 1;
@@ -103,7 +103,7 @@ static void saveClip(unsigned char *buffer, int32_t bufLen) {
 	char extension[64];
 
 	if (buffer && bufLen > 0) {
-		sprintf(filename, "clip%s.ts", clipCount);
+		sprintf(filename, "%s%d%s", "clip", clipCount++, ".ts");
 		fp = fopen(filename, "wb");
 		fwrite(buffer, bufLen, 1, fp);
 		fclose(fp);

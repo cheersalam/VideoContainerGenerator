@@ -67,7 +67,7 @@ typedef struct VCG_CONTAINER_DATA_T {
 	int32_t ppsLen;
 	int64_t videoTimeBaseDen;
 	int32_t isSegmentStarted;
-	uint64_t timeLapsedInMsec;
+	int64_t timeLapsedInMsec;
 	size_t maxClipSize;
 	size_t curClipSize;
 	size_t curClipPos; //file position
