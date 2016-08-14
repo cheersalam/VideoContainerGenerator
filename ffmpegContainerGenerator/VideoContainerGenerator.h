@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include "vcgFfmpegIncludes.h"
 
+typedef void (*SAVECLIP_CB)(unsigned char *buffer, int32_t bufLen);
+
 typedef enum VCG_CONTAINER_FMT_T {
 	VCG_CONTAINER_UNKNOWN_FMT=0,
 	VCG_CONTAINER_MPEGTS,
@@ -64,6 +66,8 @@ typedef struct VCG_CONTAINER_DATA_T {
 	int32_t spsLen;
 	int32_t ppsLen;
 	int64_t videoTimeBaseDen;
+	int32_t isSegmentStarted;
+	uint64_t timeLapsedInMsec;
 	size_t maxClipSize;
 	size_t curClipSize;
 	size_t curClipPos; //file position
@@ -71,12 +75,13 @@ typedef struct VCG_CONTAINER_DATA_T {
 	AVFormatContext *containerCtx;
 	AVCodecContext *videoCodecContext;
 	AVCodecContext *audioCodecContext;
+	SAVECLIP_CB saveClipCallback;
 }VCG_CONTAINER_DATA_T;
 
 
 
-void *initContainer(int32_t width, int32_t height, VCG_CONTAINER_FMT_T fmt, VCG_CODEC_ID_T audioCodec, VCG_CODEC_ID_T videoCodec, int32_t clipDurationInSec);
+void *initContainer(int32_t width, int32_t height, VCG_CONTAINER_FMT_T fmt, VCG_CODEC_ID_T audioCodec, VCG_CODEC_ID_T videoCodec, int32_t clipDurationInSec, SAVECLIP_CB cb);
 int32_t writeFrame(void *vcg, unsigned char *buffer, size_t buffLen, VCG_FRAME_TYPE_T frameType, int64_t pts, int64_t dts);
-void closeContainer(void *vcg, char *filename);
+void closeContainer(void *vcg);
 
 #endif /* INC_VIDEOCONTAINERGENERATOR_H_ */
