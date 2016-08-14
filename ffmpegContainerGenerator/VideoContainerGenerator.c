@@ -16,7 +16,8 @@ static int32_t addStream(VCG_CONTAINER_DATA_T *data, VCG_CODEC_ID_T codecId,
 		int32_t streamId);
 static int32_t muxInit(VCG_CONTAINER_DATA_T *data);
 static int32_t startSegment(VCG_CONTAINER_DATA_T *data);
-static int32_t allocateMemoryforClip(VCG_CONTAINER_DATA_T *data, size_t newClipSize);
+static int32_t allocateMemoryforClip(VCG_CONTAINER_DATA_T *data,
+		size_t newClipSize);
 static void stopAndClear(VCG_CONTAINER_DATA_T *data);
 static int32_t stopSegment(VCG_CONTAINER_DATA_T *data);
 
@@ -154,14 +155,6 @@ static void writeVideoPacket(VCG_CONTAINER_DATA_T *data, unsigned char *buffer,
 	while ((nalLen = getNALUnit(buffer, buffLen, &offset)) > 0) {
 		if (VCG_NAL_SLICE == (buffer[offset + 4] & 0x1F)) {
 			printf("P buffer received with len  = %zu\n", nalLen);
-			if (pts - data->timeLapsedInMsec >= 60000) {
-				if (data->isSegmentStarted) {
-					stopSegment(data);
-				}
-				startSegment(data);
-				data->isSegmentStarted = 1;
-				data->timeLapsedInMsec = pts;
-			}
 			savePacketToContainer(data, &buffer[offset], nalLen, VCG_FRAME_P,
 					pts, dts);
 			data->frameCount++;
@@ -175,6 +168,14 @@ static void writeVideoPacket(VCG_CONTAINER_DATA_T *data, unsigned char *buffer,
 			//printf("PPS buffer received with len  = %d\n", nalLen);
 		} else if (VCG_NAL_IDR == (buffer[offset + 4] & 0x1F)) {
 			printf("IDR buffer received with len  = %zu\n", nalLen);
+			if (pts - data->timeLapsedInMsec >= 60000) {
+				if (data->isSegmentStarted) {
+					stopSegment(data);
+				}
+				startSegment(data);
+				data->isSegmentStarted = 1;
+				data->timeLapsedInMsec = pts;
+			}
 			savePacketToContainer(data, buffer, nalLen, VCG_FRAME_I, pts, dts);
 			data->frameCount++;
 		} else {
@@ -352,7 +353,7 @@ static int32_t muxInit(VCG_CONTAINER_DATA_T *data) {
 		}
 	}
 
-	if(!data->clip) {
+	if (!data->clip) {
 		memset(&data->clip[0], 0, data->maxClipSize);
 		data->curClipSize = 0;
 	}
