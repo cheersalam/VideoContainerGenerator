@@ -14,12 +14,14 @@ void *initDisplay(int32_t srcWidth, int32_t srcHeight,
 		enum AVPixelFormat srcPixel, int32_t dstWidth, int32_t dstHeight) {
 	SDL_DISPLAY_T *display = NULL;
 	int32_t err = 0;
+	int flags = SDL_SWSURFACE | SDL_RESIZABLE /*|SDL_FULLSCREEN*/;
 
 	display = (SDL_DISPLAY_T *) malloc(sizeof(SDL_DISPLAY_T));
 	if (display == NULL) {
 		printf("malloc failed");
 		return NULL;
 	}
+	memset(display, 0, sizeof(SDL_DISPLAY_T));
 
 	display->width = srcWidth;
 	display->height = srcHeight;
@@ -29,14 +31,15 @@ void *initDisplay(int32_t srcWidth, int32_t srcHeight,
 		return NULL;
 	}
 
-	display->screen = SDL_SetVideoMode(srcWidth, srcHeight, 0, 0);
-	if (!display->screen) {
+	display->surface = SDL_SetVideoMode(srcWidth, srcHeight, 24, flags);
+	if (!display->surface) {
 		fprintf(stderr, "SDL: could not set video mode - exiting\n");
 		return NULL;
 	}
 
-	display->bmp = SDL_CreateYUVOverlay(srcWidth, srcHeight, SDL_YV12_OVERLAY,
-			display->screen);
+	display->overlay = SDL_CreateYUVOverlay(srcWidth, srcHeight, SDL_YV12_OVERLAY,
+			display->surface);
+
 	display->imageCtx = sws_getContext(srcWidth, srcHeight, srcPixel, dstWidth,
 			dstHeight, AV_PIX_FMT_YUV420P, SWS_BICUBIC, NULL, NULL, NULL);
 
@@ -52,8 +55,8 @@ void *initDisplay(int32_t srcWidth, int32_t srcHeight,
 		fprintf(stderr, "avcodec_open2 failed\n");
 		return NULL;
 	}
-
-	err = allocatePicBuffer(&display->bufYUV, &display->picYUV, srcWidth,
+	display->pFrame=av_frame_alloc();
+	/*err = allocatePicBuffer(&display->bufYUV, &display->picYUV, srcWidth,
 			srcHeight, AV_PIX_FMT_YUV420P, &display->sizeYUV);
 	if (0 != err) {
 		fprintf(stderr, "allocatePicBuffer failed\n");
@@ -65,7 +68,7 @@ void *initDisplay(int32_t srcWidth, int32_t srcHeight,
 	if (0 != err) {
 		fprintf(stderr, "allocatePicBuffer failed\n");
 		return NULL;
-	}
+	}*/
 
 	return display;
 }
@@ -106,7 +109,7 @@ int32_t displayH264Frame(void *data, unsigned char *buffer, size_t buffLen) {
 	}
 	packet.size = buffLen;
 	memcpy(&packet.data[0], buffer, buffLen);
-	err = avcodec_decode_video2(display->videoDecodeCtx, display->picYUV,
+	err = avcodec_decode_video2(display->videoDecodeCtx, display->pFrame,
 			&gotPic, &packet);
 
 	if (err < 0) {
@@ -116,19 +119,19 @@ int32_t displayH264Frame(void *data, unsigned char *buffer, size_t buffLen) {
 	}
 
 	if (gotPic > 0) {
-		SDL_LockYUVOverlay(display->bmp);
+		SDL_LockYUVOverlay(display->overlay);
 		AVPicture pict;
-		pict.data[0] = display->bmp->pixels[0];
-		pict.data[1] = display->bmp->pixels[2];
-		pict.data[2] = display->bmp->pixels[1];
+		pict.data[0] = display->overlay->pixels[0];
+		pict.data[1] = display->overlay->pixels[2];
+		pict.data[2] = display->overlay->pixels[1];
 
-		pict.linesize[0] = display->bmp->pitches[0];
-		pict.linesize[1] = display->bmp->pitches[2];
-		pict.linesize[2] = display->bmp->pitches[1];
+		pict.linesize[0] = display->overlay->pitches[0];
+		pict.linesize[1] = display->overlay->pitches[2];
+		pict.linesize[2] = display->overlay->pitches[1];
 
 		height = sws_scale(display->imageCtx,
-				(const uint8_t* const *) display->picYUV->data,
-				display->picYUV->linesize, 0, display->height, pict.data,
+				(const uint8_t* const *) display->pFrame->data,
+				display->pFrame->linesize, 0, display->height, pict.data,
 				pict.linesize);
 
 		if (height <= 0) {
@@ -136,13 +139,13 @@ int32_t displayH264Frame(void *data, unsigned char *buffer, size_t buffLen) {
 			sws_freeContext(display->imageCtx);
 			return -1;
 		}
-		SDL_UnlockYUVOverlay(display->bmp);
+		SDL_UnlockYUVOverlay(display->overlay);
 
 		display->rect.x = 0;
 		display->rect.y = 0;
 		display->rect.w = display->width;
 		display->rect.h = display->height;
-		SDL_DisplayYUVOverlay(display->bmp, &display->rect);
+		SDL_DisplayYUVOverlay(display->overlay, &display->rect);
 	}
 	av_free_packet(&packet);
 }
@@ -183,6 +186,11 @@ void closeDisplay(void *data) {
 	if (display->bufYUV) {
 		av_free(display->bufYUV);
 		display->bufYUV = NULL;
+	}
+
+	if (display->pFrame) {
+		av_frame_free(&display->pFrame);
+		display->pFrame = NULL;
 	}
 
 	if(display->videoDecodeCtx) {
