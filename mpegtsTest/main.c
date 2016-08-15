@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "VideoContainerGenerator.h"
+#include "ffmpegDecoder.h"
 
 static void saveClip(unsigned char *buffer, int32_t bufLen);
 
@@ -24,6 +25,7 @@ int32_t main(int argc, int **argv) {
 	unsigned char *buffer = NULL;
 	unsigned char *frame = NULL;
 	void *vcg = NULL;
+	void *display = NULL;
 
 	if (argc < 2) {
 		printf("Need h264 file name\n");
@@ -36,6 +38,12 @@ int32_t main(int argc, int **argv) {
 		printf("initContainer failed \n");
 		return 1;
 	}
+
+	display = initDisplay(1920, 1080, AV_PIX_FMT_YUV420P, 1920, 1080);
+	if (display == NULL) {
+			printf("failed in creating a display\n");
+			return 1;
+		}
 
 	filename = argv[1];
 	fp = fopen(filename, "rb");
@@ -67,9 +75,10 @@ int32_t main(int argc, int **argv) {
 			if (frameSize) {
 				memset(frame, 0, filesize);
 				memcpy(frame, &buffer[startPos], frameSize);
-				err = writeFrame(vcg, frame, frameSize,
+				/*err = writeFrame(vcg, frame, frameSize,
 						VCG_FRAME_VIDEO_COMPLETE, (40 * frameCount),
-						(40 * frameCount));
+						(40 * frameCount));*/
+				err = displayH264Frame(display, frame, frameSize);
 				if (frameSize > 100)
 					frameCount++;
 			}
@@ -85,6 +94,7 @@ int32_t main(int argc, int **argv) {
 	}
 
 	closeContainer(vcg);
+	closeDisplay(display);
 	if (buffer) {
 		free(buffer);
 	}

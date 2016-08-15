@@ -20,6 +20,8 @@ extern "C" {
 #include "libswresample/swresample.h"
 #include "libavutil/time.h"
 #include "libavutil/timestamp.h"
+#include "libavutil/imgutils.h"
+#include "libavutil/parseutils.h"
 
 #ifdef __cplusplus
 }
