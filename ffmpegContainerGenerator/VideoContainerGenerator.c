@@ -407,6 +407,7 @@ static int32_t addStream(VCG_CONTAINER_DATA_T *data, VCG_CODEC_ID_T codecId,
 }
 
 static void stopAndClear(VCG_CONTAINER_DATA_T *data) {
+    int32_t i = 0;
     if (data->clip) {
         free(data->clip);
         data->clip = NULL;
@@ -422,7 +423,7 @@ static void stopAndClear(VCG_CONTAINER_DATA_T *data) {
     }
 
     if (data->containerCtx) {
-        for (int32_t i = 0; i < data->containerCtx->nb_streams; i++) {
+        for (i = 0; i < data->containerCtx->nb_streams; i++) {
             //avcodec_close(data->containerCtx->streams[i]->codec);
             //avformat_free_context(data->containerCtx->streams[i]);
         }
