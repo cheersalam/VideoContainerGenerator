@@ -70,7 +70,7 @@ typedef struct VCG_CONTAINER_DATA_T {
 	int64_t timeLapsedInMsec;
 	size_t maxClipSize;
 	size_t curClipSize;
-	size_t curClipPos; //file position
+	uint64_t curClipPos; //file position
 	struct timeval startTime;
 	AVFormatContext *containerCtx;
 	AVCodecContext *videoCodecContext;

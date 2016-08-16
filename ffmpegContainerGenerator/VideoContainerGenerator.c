@@ -19,7 +19,7 @@ static int32_t startSegment(VCG_CONTAINER_DATA_T *data);
 static int32_t allocateMemoryforClip(VCG_CONTAINER_DATA_T *data,
         size_t newClipSize);
 static void stopAndClear(VCG_CONTAINER_DATA_T *data);
-static int32_t stopSegment(VCG_CONTAINER_DATA_T *data);
+static void stopSegment(VCG_CONTAINER_DATA_T *data);
 
 void *initContainer(int32_t width, int32_t height, VCG_CONTAINER_FMT_T fmt,
         VCG_CODEC_ID_T audioCodec, VCG_CODEC_ID_T videoCodec,
@@ -37,7 +37,7 @@ void *initContainer(int32_t width, int32_t height, VCG_CONTAINER_FMT_T fmt,
         return NULL;
     }
 
-    memset(data, 0, sizeof(data));
+    memset(data, 0, sizeof(VCG_CONTAINER_DATA_T));
     data->width = width;
     data->height = height;
     data->fmt = fmt;
@@ -212,8 +212,7 @@ static int32_t startSegment(VCG_CONTAINER_DATA_T *data) {
     return avformat_write_header(data->containerCtx, NULL);
 }
 
-static int32_t stopSegment(VCG_CONTAINER_DATA_T *data) {
-    int32_t err = 0;
+static void stopSegment(VCG_CONTAINER_DATA_T *data) {
     printf("stopSegment......\n");
     if (data->containerCtx) {
         av_write_trailer(data->containerCtx);
@@ -299,7 +298,7 @@ static int64_t seekPacket(void *opaque, int64_t offset, int whence) {
 
     switch (whence) {
     case SEEK_CUR:
-        if (data->curClipPos + offset <= (int) data->curClipSize) { //In negative???
+        if (data->curClipPos + offset <= data->curClipSize) { //In negative???
             new_offset = data->curClipPos + offset;
         }
         break;
@@ -374,7 +373,7 @@ static int32_t muxInit(VCG_CONTAINER_DATA_T *data) {
 static int32_t addStream(VCG_CONTAINER_DATA_T *data, VCG_CODEC_ID_T codecId,
         int32_t streamId) {
     AVStream *stream = NULL;
-    AVCodec *codec = NULL;
+    //AVCodec *codec = NULL;
 
     stream = avformat_new_stream(data->containerCtx, NULL);
     if (!stream) {
@@ -398,6 +397,11 @@ static int32_t addStream(VCG_CONTAINER_DATA_T *data, VCG_CODEC_ID_T codecId,
         //stream->codecpar->flags |= CODEC_FLAG_GLOBAL_HEADER;
         //stream->time_base = (AVRational ) { 1, 30 };
         //data->videoCodecContext = codecContext;
+        break;
+    case VCG_CODEC_ID_NONE:
+    case VCG_CODEC_ID_AAC:
+    default:
+    	break;
     }
 
     if (data->containerCtx->oformat->flags & AVFMT_GLOBALHEADER) {
@@ -407,7 +411,7 @@ static int32_t addStream(VCG_CONTAINER_DATA_T *data, VCG_CODEC_ID_T codecId,
 }
 
 static void stopAndClear(VCG_CONTAINER_DATA_T *data) {
-    int32_t i = 0;
+    uint32_t i = 0;
     if (data->clip) {
         free(data->clip);
         data->clip = NULL;

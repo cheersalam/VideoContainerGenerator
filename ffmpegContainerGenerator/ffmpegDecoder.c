@@ -120,7 +120,7 @@ int32_t displayH264Frame(void *data, unsigned char *buffer, size_t buffLen) {
 
 	if (gotPic > 0) {
 		SDL_LockYUVOverlay(display->overlay);
-		AVPicture pict;
+		AVFrame pict;
 		pict.data[0] = display->overlay->pixels[0];
 		pict.data[1] = display->overlay->pixels[2];
 		pict.data[2] = display->overlay->pixels[1];

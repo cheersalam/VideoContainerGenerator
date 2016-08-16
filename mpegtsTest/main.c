@@ -13,9 +13,8 @@
 static void saveClip(unsigned char *buffer, int32_t bufLen);
 
 static int32_t clipCount = 1;
-int32_t main(int argc, int **argv) {
+int32_t main(int argc, char **argv) {
 	FILE *fp = NULL;
-	int32_t err = 0;
 	int32_t frameCount = 0;
 	size_t filesize = 0;
 	size_t offset = 0;
@@ -78,7 +77,7 @@ int32_t main(int argc, int **argv) {
 				/*err = writeFrame(vcg, frame, frameSize,
 						VCG_FRAME_VIDEO_COMPLETE, (40 * frameCount),
 						(40 * frameCount));*/
-				err = displayH264Frame(display, frame, frameSize);
+				displayH264Frame(display, frame, frameSize);
 				if (frameSize > 100)
 					frameCount++;
 			}
@@ -110,7 +109,6 @@ int32_t main(int argc, int **argv) {
 static void saveClip(unsigned char *buffer, int32_t bufLen) {
 	FILE *fp = NULL;
 	char filename[64];
-	char extension[64];
 
 	if (buffer && bufLen > 0) {
 		sprintf(filename, "%s%d%s", "clip", clipCount++, ".ts");

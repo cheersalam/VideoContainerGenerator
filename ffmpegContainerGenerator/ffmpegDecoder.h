@@ -28,7 +28,6 @@ typedef struct  SDL_DISPLAY_T{
 	int32_t sizeYUV;
 	SDL_Rect rect;
 	AVFrame  *pFrame;
-
 }SDL_DISPLAY_T;
 
 void *initDisplay(int32_t srcWidth, int32_t srcHeight,
