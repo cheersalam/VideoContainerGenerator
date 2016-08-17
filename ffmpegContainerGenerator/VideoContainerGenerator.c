@@ -387,16 +387,18 @@ static int32_t addStream(VCG_CONTAINER_DATA_T *data, VCG_CODEC_ID_T codecId,
 
     switch (codecId) {
     case VCG_CODEC_ID_H264:
+    	stream->time_base.num = 1;
+    	stream->time_base.den = 1000;
+#if 0
         stream->codecpar->codec_id = AV_CODEC_ID_H264;
         stream->codecpar->codec_type = AVMEDIA_TYPE_VIDEO;
         stream->codecpar->width = data->width;
         stream->codecpar->height = data->height;
-        stream->time_base.num = 1;
-        stream->time_base.den = 1000;
-        //stream->codecpar-> ->pix_fmt = AV_PIX_FMT_YUV420P;
-        //stream->codecpar->flags |= CODEC_FLAG_GLOBAL_HEADER;
-        //stream->time_base = (AVRational ) { 1, 30 };
-        //data->videoCodecContext = codecContext;
+#endif
+        stream->codec->codec_id = AV_CODEC_ID_H264;
+        stream->codec->codec_type = AVMEDIA_TYPE_VIDEO;
+        stream->codec->width = data->width;
+        stream->codec->height = data->height;
         break;
     case VCG_CODEC_ID_NONE:
     case VCG_CODEC_ID_AAC:
