@@ -17,7 +17,7 @@ typedef struct  SDL_DISPLAY_T{
 	int32_t height;
 	SDL_Surface *surface;
 	SDL_Overlay  *overlay;
-	struct SWSContext *imageCtx;
+	struct SwsContext *imageCtx;
 	AVCodec *videoCodec;
 	AVCodecContext *videoDecodeCtx;
 	AVFrame *picRGB;

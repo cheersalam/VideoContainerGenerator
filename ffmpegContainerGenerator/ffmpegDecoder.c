@@ -148,6 +148,7 @@ int32_t displayH264Frame(void *data, unsigned char *buffer, size_t buffLen) {
 		SDL_DisplayYUVOverlay(display->overlay, &display->rect);
 	}
 	av_free_packet(&packet);
+	return 0;
 }
 
 void closeDisplay(void *data) {
@@ -169,12 +170,12 @@ void closeDisplay(void *data) {
 	}
 
 	if (display->picRGB) {
-		av_frame_free(display->picRGB);
+		av_frame_free(&display->picRGB);
 		display->picRGB = NULL;
 	}
 
 	if (display->picYUV) {
-		//av_frame_free(display->picYUV);
+		av_frame_free(&display->picYUV);
 		display->picYUV = NULL;
 	}
 
