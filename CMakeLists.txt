@@ -73,17 +73,17 @@ endif()
 # External Project - ffmpeg
 #------------------------------------------------------------------------------
 include(ExternalProject)
-ExternalProject_Add(
-                    ffmpeg
-                    GIT_REPOSITORY https://github.com/FFmpeg/FFmpeg.git
-                    GIT_TAG master
-                    UPDATE_COMMAND ""
-                    SOURCE_DIR ${PROJECT_SOURCE_DIR}/thirdparty/ffmpeg
-                    BUILD_IN_SOURCE 1
-                    BUILD_ALWAYS 0
-                    CONFIGURE_COMMAND ./configure  --enable-pthreads --enable-static --enable-shared --prefix=${PROJECT_BINARY_DIR}
-                    BUILD_COMMAND make
-                    INSTALL_COMMAND make install)
+#ExternalProject_Add(
+#                    ffmpeg
+#                    GIT_REPOSITORY https://github.com/FFmpeg/FFmpeg.git
+#                    GIT_TAG master
+#                    UPDATE_COMMAND ""
+#                    SOURCE_DIR ${PROJECT_SOURCE_DIR}/thirdparty/ffmpeg
+#                    BUILD_IN_SOURCE 1
+#                    BUILD_ALWAYS 0
+#                    CONFIGURE_COMMAND ./configure  --enable-pthreads --enable-static --enable-shared --prefix=${PROJECT_BINARY_DIR}
+#                    BUILD_COMMAND make
+#                    INSTALL_COMMAND make install)
 
 #------------------------------------------------------------------------------
 # Adding FFMPEG lib
@@ -104,7 +104,7 @@ set(PROJECT_LIBS ${FFMPEG_LIBS}  ${FFMPEG_CONTAINER_GEN} -lSDL)
 # Adding colors 
 #------------------------------------------------------------------------------
 set(CMAKE_COLOR_MAKEFILE ON)
-set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 #------------------------------------------------------------------------------
 # Sub Directories 

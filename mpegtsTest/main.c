@@ -7,10 +7,29 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <signal.h>
 #include "VideoContainerGenerator.h"
 #include "ffmpegDecoder.h"
 
+
+static volatile int32_t startExit = 0;
 static void saveClip(unsigned char *buffer, int32_t bufLen);
+
+struct sigaction sigact;
+
+static void signalHandler(int sig){
+    if (sig == SIGINT) {
+    	printf("\nBye Bye... \n");
+    	startExit = 1;
+    }
+}
+
+void initSignals(void){
+    sigact.sa_handler = signalHandler;
+    sigemptyset(&sigact.sa_mask);
+    sigact.sa_flags = 0;
+    sigaction(SIGINT, &sigact, (struct sigaction *)NULL);
+}
 
 static int32_t clipCount = 1;
 int32_t main(int argc, char **argv) {
@@ -25,12 +44,14 @@ int32_t main(int argc, char **argv) {
 	unsigned char *frame = NULL;
 	void *vcg = NULL;
 	void *display = NULL;
+	int32_t err = 0;
 
 	if (argc < 2) {
 		printf("Need h264 file name\n");
 		return 1;
 	}
 
+	initSignals();
 	vcg = initContainer(1920, 1080, VCG_CONTAINER_MPEGTS, VCG_CODEC_ID_NONE,
 			VCG_CODEC_ID_H264, 1000, &saveClip);
 	if (vcg == NULL) {
@@ -65,7 +86,7 @@ int32_t main(int argc, char **argv) {
 	frame = (unsigned char *) malloc(filesize);
 	fread(buffer, filesize, 1, fp);
 
-	while (offset < filesize) {
+	while (offset < filesize && !startExit && !err) {
 		if (buffer[offset] == 0 && buffer[offset + 1] == 0
 				&& buffer[offset + 2] == 0 && buffer[offset + 3] == 1) {
 
@@ -77,7 +98,7 @@ int32_t main(int argc, char **argv) {
 				/*err = writeFrame(vcg, frame, frameSize,
 						VCG_FRAME_VIDEO_COMPLETE, (40 * frameCount),
 						(40 * frameCount));*/
-				displayH264Frame(display, frame, frameSize);
+				err = displayH264Frame(display, frame, frameSize);
 				if (frameSize > 100)
 					frameCount++;
 			}

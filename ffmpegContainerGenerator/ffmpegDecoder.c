@@ -101,6 +101,7 @@ int32_t displayH264Frame(void *data, unsigned char *buffer, size_t buffLen) {
 	int32_t gotPic = 0;
 	int32_t height = 0;
 	AVPacket packet;
+	SDL_Event       event;
 
 	av_init_packet(&packet);
 	err = av_new_packet(&packet, buffLen);
@@ -115,7 +116,7 @@ int32_t displayH264Frame(void *data, unsigned char *buffer, size_t buffLen) {
 	if (err < 0) {
 		fprintf(stderr, "avcodec_decode_video2 failed\n");
 		av_free_packet(&packet);
-		return -1;
+		return 0;
 	}
 
 	if (gotPic > 0) {
@@ -147,26 +148,30 @@ int32_t displayH264Frame(void *data, unsigned char *buffer, size_t buffLen) {
 		display->rect.h = display->height;
 		SDL_DisplayYUVOverlay(display->overlay, &display->rect);
 	}
+
+	SDL_PollEvent(&event);
+	switch(event.type) {
+		case SDL_QUIT:
+	    {
+	    	SDL_Quit();
+	    	av_free_packet(&packet);
+	    	printf("Display quitting...\n");
+	    	return -1;
+	    	break;
+	    }
+
+	    default:
+	      break;
+	}
 	av_free_packet(&packet);
 	return 0;
 }
 
 void closeDisplay(void *data) {
 	SDL_DISPLAY_T *display = data;
-	SDL_Event event;
 
 	if(!display) {
 		return;
-	}
-
-	SDL_PollEvent(&event);
-	switch (event.type) {
-	case SDL_QUIT:
-		SDL_Quit();
-		exit(0);
-		break;
-	default:
-		break;
 	}
 
 	if (display->picRGB) {
@@ -194,12 +199,21 @@ void closeDisplay(void *data) {
 		display->pFrame = NULL;
 	}
 
-	if(display->videoDecodeCtx) {
-		//avcodec_close(display->videoCodec);
-		//avcodec_free_context(display->videoDecodeCtx);
-		display->videoDecodeCtx = NULL;
+	if (display->imageCtx) {
+		sws_freeContext(display->imageCtx);
+		display->imageCtx = NULL;
 	}
 
+	if (display->overlay) {
+		SDL_FreeYUVOverlay(display->overlay);
+	}
+
+	if(display->videoDecodeCtx) {
+		//avcodec_close(&display->videoCodec);
+		avcodec_free_context(&display->videoDecodeCtx);
+		display->videoDecodeCtx = NULL;
+	}
+	SDL_Quit();
 	free(display);
 	display = NULL;
 }
