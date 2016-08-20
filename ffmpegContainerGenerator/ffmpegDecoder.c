@@ -95,13 +95,35 @@ int32_t allocatePicBuffer(unsigned char **buf, AVFrame **pic, int32_t width,
 	return 0;;
 }
 
+
+int32_t checkSDLStatus() {
+	SDL_Event       event;
+	SDL_PollEvent(&event);
+	switch(event.type) {
+		case SDL_QUIT:
+	    {
+	    	SDL_Quit();
+	    	printf("Display quitting...\n");
+	    	return -1;
+	    	break;
+	    }
+	    default:
+	      break;
+	}
+	return 1;
+}
+
 int32_t displayH264Frame(void *data, unsigned char *buffer, size_t buffLen) {
 	SDL_DISPLAY_T *display = data;
 	int32_t err = 0;
 	int32_t gotPic = 0;
 	int32_t height = 0;
 	AVPacket packet;
-	SDL_Event       event;
+
+	err = checkSDLStatus();
+	if (err < 0) {
+		return -1;
+	}
 
 	av_init_packet(&packet);
 	err = av_new_packet(&packet, buffLen);
@@ -149,20 +171,6 @@ int32_t displayH264Frame(void *data, unsigned char *buffer, size_t buffLen) {
 		SDL_DisplayYUVOverlay(display->overlay, &display->rect);
 	}
 
-	SDL_PollEvent(&event);
-	switch(event.type) {
-		case SDL_QUIT:
-	    {
-	    	SDL_Quit();
-	    	av_free_packet(&packet);
-	    	printf("Display quitting...\n");
-	    	return -1;
-	    	break;
-	    }
-
-	    default:
-	      break;
-	}
 	av_free_packet(&packet);
 	return 0;
 }
