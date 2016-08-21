@@ -13,7 +13,7 @@ it also works on Raspberry Pi3 running raspbian jessie
 
   `sudo apt-get install cmake yasm libsdl-dev`
 
-# Compilatin
+# Compiling project
  Go to root of the project
 
  * create debug directory
@@ -28,3 +28,4 @@ $ cd debug
 $ cmake ..
 $ make
 ```
+> Note: If compiling on pi3, it takes around 1 hour to compile whole project. Once ffmpeg is compiled it takes less than a minute to compile whole project again.
