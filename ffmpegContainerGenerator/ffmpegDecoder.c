@@ -137,7 +137,7 @@ int32_t displayH264Frame(void *data, unsigned char *buffer, size_t buffLen) {
 
 	if (err < 0) {
 		fprintf(stderr, "avcodec_decode_video2 failed\n");
-		av_free_packet(&packet);
+		av_packet_unref(&packet);
 		return 0;
 	}
 
@@ -158,7 +158,7 @@ int32_t displayH264Frame(void *data, unsigned char *buffer, size_t buffLen) {
 				pict.linesize);
 
 		if (height <= 0) {
-			av_free_packet(&packet);
+			av_packet_unref(&packet);
 			sws_freeContext(display->imageCtx);
 			return -1;
 		}
@@ -171,7 +171,7 @@ int32_t displayH264Frame(void *data, unsigned char *buffer, size_t buffLen) {
 		SDL_DisplayYUVOverlay(display->overlay, &display->rect);
 	}
 
-	av_free_packet(&packet);
+	av_packet_unref(&packet);
 	return 0;
 }
 

@@ -389,16 +389,17 @@ static int32_t addStream(VCG_CONTAINER_DATA_T *data, VCG_CODEC_ID_T codecId,
     case VCG_CODEC_ID_H264:
     	stream->time_base.num = 1;
     	stream->time_base.den = 1000;
-#if 0
+
         stream->codecpar->codec_id = AV_CODEC_ID_H264;
         stream->codecpar->codec_type = AVMEDIA_TYPE_VIDEO;
         stream->codecpar->width = data->width;
         stream->codecpar->height = data->height;
-#endif
+#if 0
         stream->codec->codec_id = AV_CODEC_ID_H264;
         stream->codec->codec_type = AVMEDIA_TYPE_VIDEO;
         stream->codec->width = data->width;
         stream->codec->height = data->height;
+#endif
         break;
     case VCG_CODEC_ID_NONE:
     case VCG_CODEC_ID_AAC:
