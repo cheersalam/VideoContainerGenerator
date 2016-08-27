@@ -95,7 +95,7 @@ set(FFMPEG_LIBS avcodec avdevice avfilter avformat avutil swresample swscale)
 #------------------------------------------------------------------------------
 # Adding containerGenerator Lib
 #------------------------------------------------------------------------------
-set(FFMPEG_CONTAINER_GEN ffmpegContainerGenerator)
+set(FFMPEG_CONTAINER_GEN ffmpegWrapper)
 
 #------------------------------------------------------------------------------
 # Add all servers lib dependecies here. (/trunk/src/servers) 
@@ -111,7 +111,7 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 #------------------------------------------------------------------------------
 # Sub Directories 
 #------------------------------------------------------------------------------
-add_subdirectory (ffmpegContainerGenerator) 
+add_subdirectory (ffmpegWrapper) 
 add_subdirectory (mpegtsTest) 
 
 #------------------------------------------------------------------------------
