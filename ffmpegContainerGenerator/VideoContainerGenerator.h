@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include "vcgFfmpegIncludes.h"
 
-typedef void (*SAVECLIP_CB)(unsigned char *buffer, int32_t bufLen);
+typedef void (*SAVECLIP_CB)(unsigned char *buffer, int32_t bufLen, int64_t durationMsec);
 
 typedef enum VCG_CONTAINER_FMT_T {
 	VCG_CONTAINER_UNKNOWN_FMT=0,
@@ -68,6 +68,7 @@ typedef struct VCG_CONTAINER_DATA_T {
 	int64_t videoTimeBaseDen;
 	int32_t isSegmentStarted;
 	int64_t timeLapsedInMsec;
+	int64_t segmentDurationInMsec;
 	size_t maxClipSize;
 	size_t curClipSize;
 	uint64_t curClipPos; //file position

@@ -10,10 +10,11 @@
 #include <signal.h>
 #include "VideoContainerGenerator.h"
 #include "ffmpegDecoder.h"
+#include "createPlaylist.h"
 
 
 static volatile int32_t startExit = 0;
-static void saveClip(unsigned char *buffer, int32_t bufLen);
+static void saveClip(unsigned char *buffer, int32_t bufLen, int64_t durationMsec);
 
 struct sigaction sigact;
 
@@ -31,6 +32,7 @@ void initSignals(void){
     sigaction(SIGINT, &sigact, (struct sigaction *)NULL);
 }
 
+void *playlist = NULL;
 static int32_t clipCount = 1;
 int32_t main(int argc, char **argv) {
 	FILE *fp = NULL;
@@ -44,6 +46,7 @@ int32_t main(int argc, char **argv) {
 	unsigned char *frame = NULL;
 	void *vcg = NULL;
 	void *display = NULL;
+
 	int32_t err = 0;
 
 	if (argc < 2) {
@@ -82,6 +85,11 @@ int32_t main(int argc, char **argv) {
 		return 0;
 	}
 
+	playlist = initPlayList("/var/www/html/parrot", "test");
+	if(playlist == NULL) {
+		return 0;
+	}
+
 	buffer = (unsigned char *) malloc(filesize);
 	frame = (unsigned char *) malloc(filesize);
 	fread(buffer, filesize, 1, fp);
@@ -95,9 +103,9 @@ int32_t main(int argc, char **argv) {
 			if (frameSize) {
 				memset(frame, 0, filesize);
 				memcpy(frame, &buffer[startPos], frameSize);
-				/*err = writeFrame(vcg, frame, frameSize,
+				err = writeFrame(vcg, frame, frameSize,
 						VCG_FRAME_VIDEO_COMPLETE, (40 * frameCount),
-						(40 * frameCount));*/
+						(40 * frameCount));
 				err = displayH264Frame(display, frame, frameSize);
 				if (frameSize > 100)
 					frameCount++;
@@ -115,6 +123,7 @@ int32_t main(int argc, char **argv) {
 
 	closeContainer(vcg);
 	closeDisplay(display);
+	finalizePlaylist(playlist);
 	if (buffer) {
 		free(buffer);
 	}
@@ -127,15 +136,16 @@ int32_t main(int argc, char **argv) {
 	return 0;
 }
 
-static void saveClip(unsigned char *buffer, int32_t bufLen) {
+static void saveClip(unsigned char *buffer, int32_t bufLen, int64_t durationMsec) {
 	FILE *fp = NULL;
 	char filename[64];
 
 	if (buffer && bufLen > 0) {
-		sprintf(filename, "%s%d%s", "clip", clipCount++, ".ts");
+		sprintf(filename, "/var/www/html/parrot/%s%d%s", "clip", clipCount++, ".ts");
 		fp = fopen(filename, "wb");
 		fwrite(buffer, bufLen, 1, fp);
 		fclose(fp);
+		addFileToPlaylist(playlist, durationMsec, filename, "/var/www/html/parrot");
 	}
 }
 

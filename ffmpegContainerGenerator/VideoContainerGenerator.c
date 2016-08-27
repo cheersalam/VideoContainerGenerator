@@ -170,7 +170,8 @@ static void writeVideoPacket(VCG_CONTAINER_DATA_T *data, unsigned char *buffer,
         } else if (VCG_NAL_IDR == (buffer[offset + 4] & 0x1F)) {
             //printf("IDR buffer received with len  = %zu\n", nalLen);
             printf("pts  = %zu lapse = %zu\n", pts, data->timeLapsedInMsec);
-            if (pts == 0 || pts - data->timeLapsedInMsec >= 1000) {
+            data->segmentDurationInMsec = pts - data->timeLapsedInMsec;
+            if (pts == 0 || data->segmentDurationInMsec >= 1000) {
                 if (data->isSegmentStarted) {
                     stopSegment(data);
                 }
@@ -217,7 +218,7 @@ static void stopSegment(VCG_CONTAINER_DATA_T *data) {
     if (data->containerCtx) {
         av_write_trailer(data->containerCtx);
         if (data->saveClipCallback) {
-            data->saveClipCallback(data->clip, data->curClipSize);
+            data->saveClipCallback(data->clip, data->curClipSize, data->segmentDurationInMsec);
             data->curClipPos = 0;
         }
     }
