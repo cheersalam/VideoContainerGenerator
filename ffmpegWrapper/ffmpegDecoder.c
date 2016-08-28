@@ -178,6 +178,7 @@ int32_t displayH264Frame(void *data, unsigned char *buffer, size_t buffLen) {
 void closeDisplay(void *data) {
 	SDL_DISPLAY_T *display = data;
 
+	printf("closeDisplay\n");
 	if(!display) {
 		return;
 	}

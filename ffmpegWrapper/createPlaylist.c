@@ -21,7 +21,7 @@ void *initPlayList(char *path, char *playlistName) {
 
 int32_t addFileToPlaylist(void *data, int64_t durationms, char *fileName, char *path) {
 	PLAYLIST_T *playlist = data;
-	MEDIA_FILES_T *necwFile = NULL;
+	MEDIA_FILES_T *newFile = NULL;
 	MEDIA_FILES_T *readFileList = NULL;
 
 	if (data == NULL || fileName == NULL || durationms == 0) {
