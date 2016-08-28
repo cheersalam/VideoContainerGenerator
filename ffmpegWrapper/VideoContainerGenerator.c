@@ -164,12 +164,12 @@ static void writeVideoPacket(VCG_CONTAINER_DATA_T *data, unsigned char *buffer,
             savesps(data, &buffer[offset], nalLen);
             //printf("SPS buffer received with len  = %d\n", nalLen);
         } else if (VCG_NAL_PPS == (buffer[offset + 4] & 0x1F)) {
-            printf("PPS buffer received with len  = %zu\n", nalLen);
+            //printf("PPS buffer received with len  = %zu\n", nalLen);
             savepps(data, &buffer[offset], nalLen);
             //printf("PPS buffer received with len  = %d\n", nalLen);
         } else if (VCG_NAL_IDR == (buffer[offset + 4] & 0x1F)) {
             //printf("IDR buffer received with len  = %zu\n", nalLen);
-            printf("pts  = %zu lapse = %zu\n", pts, data->timeLapsedInMsec);
+            //printf("pts  = %zu lapse = %zu\n", pts, data->timeLapsedInMsec);
             data->segmentDurationInMsec = pts - data->timeLapsedInMsec;
             if (pts == 0 || data->segmentDurationInMsec >= 1000) {
                 if (data->isSegmentStarted) {
@@ -220,6 +220,7 @@ static void stopSegment(VCG_CONTAINER_DATA_T *data) {
         if (data->saveClipCallback) {
             data->saveClipCallback(data->clip, data->curClipSize, data->segmentDurationInMsec);
             data->curClipPos = 0;
+            data->curClipSize = 0;
         }
     }
 }
@@ -245,6 +246,7 @@ static int32_t allocateMemoryforClip(VCG_CONTAINER_DATA_T *data,
 
     data->clip = newPtr;
     data->maxClipSize = newClipSize;
+    printf("allocateMemoryforClip = %zu\n", newClipSize);
     return 0;
 }
 
@@ -355,8 +357,9 @@ static int32_t muxInit(VCG_CONTAINER_DATA_T *data) {
             return -1;
         }
     }
+    memset(&data->frameBuf[0], 0, MAX_FRAME_SIZE);
 
-    if (!data->clip) {
+    if (data->clip) {
         memset(&data->clip[0], 0, data->maxClipSize);
         data->curClipSize = 0;
     }
