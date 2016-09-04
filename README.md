@@ -6,6 +6,11 @@ It accepts H264 video frames (no audio at the moment) and can decode it for rend
 
 it also works on Raspberry Pi3 running raspbian jessie
 
+# Features
+* Renders video using SDL
+* Generates mpegts containers
+* Creates Apple HLS playlist
+
 # Dependencies
  * `cmake`: for compiling project
  * `yasm` needed by ffmpeg
