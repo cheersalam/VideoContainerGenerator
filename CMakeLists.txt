@@ -100,7 +100,7 @@ set(FFMPEG_CONTAINER_GEN ffmpegWrapper)
 #------------------------------------------------------------------------------
 # Add all servers lib dependecies here. (/trunk/src/servers) 
 #------------------------------------------------------------------------------
-set(PROJECT_LIBS ${FFMPEG_LIBS}  ${FFMPEG_CONTAINER_GEN} -lSDL -lm)
+set(PROJECT_LIBS ${FFMPEG_CONTAINER_GEN} ${FFMPEG_LIBS} -lSDL -lm)
 
 #------------------------------------------------------------------------------
 # Adding colors 
